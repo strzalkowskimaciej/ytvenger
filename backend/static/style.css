@@ -1,0 +1,115 @@
+:root {
+  --bg: #1a1a2e;
+  --surface: #16213e;
+  --accent: #e94560;
+  --text: #eaeaea;
+  --muted: #8888aa;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error-color: #f44336;
+  --radius: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, sans-serif;
+  padding: 2rem 1rem;
+}
+
+.container { max-width: 720px; margin: 0 auto; }
+
+h1 { font-size: 2.5rem; color: var(--accent); }
+.subtitle { color: var(--muted); margin-bottom: 2rem; margin-top: 0.25rem; }
+
+.input-row { display: flex; gap: 0.5rem; }
+.input-row input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  background: var(--surface);
+  border: 1px solid #333;
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 1rem;
+}
+.input-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.input-row button {
+  padding: 0.75rem 1.25rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 1rem;
+  white-space: nowrap;
+  font-weight: 600;
+}
+.input-row button:hover { filter: brightness(1.15); }
+.input-row button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.error-msg { color: var(--error-color); margin-top: 0.5rem; font-size: 0.9rem; }
+.hidden { display: none; }
+
+h2 { margin: 2rem 0 1rem; font-size: 1.25rem; }
+
+.job-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid var(--muted);
+}
+.job-card.status-downloading { border-left-color: var(--warning); }
+.job-card.status-done        { border-left-color: var(--success); }
+.job-card.status-error       { border-left-color: var(--error-color); }
+
+.job-title { font-weight: 600; margin-bottom: 0.4rem; word-break: break-all; }
+.job-meta { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; }
+
+.status-badge {
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  background: #444;
+}
+.status-downloading .status-badge { background: var(--warning); color: #000; }
+.status-done        .status-badge { background: var(--success); color: #000; }
+.status-error       .status-badge { background: var(--error-color); color: #fff; }
+
+.job-time { color: var(--muted); }
+.job-error { color: var(--error-color); font-size: 0.85rem; margin-top: 0.5rem; }
+
+.download-btn {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.4rem 1rem;
+  background: var(--success);
+  color: #000;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.download-btn:hover { filter: brightness(1.1); }
+
+.empty-state { color: var(--muted); font-style: italic; }
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--warning);
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 0.4rem;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

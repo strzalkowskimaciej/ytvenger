@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YTVenger</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>YTVenger</h1>
+    <p class="subtitle">YouTube → MP3 Converter</p>
+
+    <form id="submit-form">
+      <div class="input-row">
+        <input
+          type="url"
+          id="url-input"
+          placeholder="https://www.youtube.com/watch?v=..."
+          required
+          autocomplete="off"
+        />
+        <button type="submit" id="submit-btn">Add to Queue</button>
+      </div>
+      <div id="form-error" class="error-msg hidden"></div>
+    </form>
+
+    <section id="jobs-section">
+      <h2>Queue <span id="queue-count"></span></h2>
+      <div id="jobs-list">
+        <p class="empty-state">No jobs yet. Paste a URL above to get started.</p>
+      </div>
+    </section>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
