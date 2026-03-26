@@ -53,7 +53,29 @@ h1 { font-size: 2.5rem; color: var(--accent); }
 .input-row button:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .error-msg { color: var(--error-color); margin-top: 0.5rem; font-size: 0.9rem; }
+.info-msg  { color: var(--success);     margin-top: 0.5rem; font-size: 0.9rem; }
 .hidden { display: none; }
+
+.playlist-confirm {
+  margin-top: 0.75rem;
+  background: var(--surface);
+  border: 1px solid #ff9800;
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+}
+.playlist-confirm p { margin-bottom: 0.65rem; font-size: 0.95rem; }
+.confirm-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.confirm-buttons button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+#btn-playlist { background: var(--accent);  color: #fff; }
+#btn-single   { background: var(--success); color: #000; }
+.btn-cancel   { background: #444;           color: var(--text); }
 
 h2 { margin: 2rem 0 1rem; font-size: 1.25rem; }
 

@@ -12,7 +12,7 @@ DOWNLOADS_DIR = Path("/app/downloads")
 MAX_CONCURRENT_WORKERS = 2
 
 
-def create_job(url: str) -> Job:
+def _make_job(url: str) -> Job:
     job = Job(
         id=str(uuid.uuid4()),
         url=url,
@@ -23,6 +23,37 @@ def create_job(url: str) -> Job:
     _jobs[job.id] = job
     _queue.put_nowait(job.id)
     return job
+
+
+def create_job(url: str) -> Job:
+    return _make_job(url)
+
+
+def is_playlist_url(url: str) -> bool:
+    return "list=" in url
+
+
+def extract_playlist_videos(url: str) -> list[str]:
+    """Extract individual video URLs from a playlist (no download). Blocking — run in executor."""
+    ydl_opts = {
+        "quiet": True,
+        "extract_flat": "in_playlist",
+        "noplaylist": False,
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=False)
+
+    if info.get("_type") == "playlist":
+        return [
+            f"https://www.youtube.com/watch?v={entry['id']}"
+            for entry in info.get("entries", [])
+            if entry and entry.get("id")
+        ]
+    return [url]
+
+
+def create_jobs_from_urls(urls: list[str]) -> list[Job]:
+    return [_make_job(url) for url in urls]
 
 
 def get_job(job_id: str) -> Job | None:

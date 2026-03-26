@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
@@ -8,6 +9,8 @@ import queue_manager
 
 DOWNLOADS_DIR = Path("/app/downloads")
 STATIC_DIR = Path("/app/static")
+
+VALID_URL_PREFIXES = ("youtube.com/watch", "youtu.be/", "youtube.com/playlist")
 
 
 @asynccontextmanager
@@ -23,11 +26,22 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
 
 @app.post("/api/jobs", status_code=201)
-def submit_job(req: SubmitRequest):
-    if "youtube.com/watch" not in req.url and "youtu.be/" not in req.url:
+async def submit_job(req: SubmitRequest):
+    if not any(p in req.url for p in VALID_URL_PREFIXES):
         raise HTTPException(status_code=422, detail="Only YouTube URLs are accepted")
-    job = queue_manager.create_job(req.url)
-    return job
+
+    if queue_manager.is_playlist_url(req.url):
+        loop = asyncio.get_running_loop()
+        try:
+            urls = await loop.run_in_executor(None, queue_manager.extract_playlist_videos, req.url)
+        except Exception as exc:
+            raise HTTPException(status_code=422, detail=f"Failed to read playlist: {exc}")
+        if not urls:
+            raise HTTPException(status_code=422, detail="No videos found in playlist")
+        jobs = queue_manager.create_jobs_from_urls(urls)
+        return jobs
+
+    return [queue_manager.create_job(req.url)]
 
 
 @app.get("/api/jobs")
