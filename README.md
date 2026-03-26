@@ -5,6 +5,7 @@ A local web app to convert YouTube videos to MP3 files using [yt-dlp](https://gi
 ## Features
 
 - Paste a YouTube URL and get an MP3 download link
+- Playlist support — paste a playlist URL and choose to download the entire playlist or just the current video
 - Add multiple URLs while previous ones are still converting
 - 2 concurrent downloads running in parallel
 - MP3 files named after the video title (Windows-safe characters)
