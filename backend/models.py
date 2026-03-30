@@ -9,6 +9,7 @@ class JobStatus(str, Enum):
     DOWNLOADING = "downloading"
     DONE = "done"
     ERROR = "error"
+    CANCELLED = "cancelled"
 
 
 class Job(BaseModel):

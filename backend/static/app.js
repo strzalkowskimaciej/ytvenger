@@ -1,20 +1,22 @@
-const form           = document.getElementById('submit-form');
-const urlInput       = document.getElementById('url-input');
-const jobsList       = document.getElementById('jobs-list');
-const formError      = document.getElementById('form-error');
-const submitBtn      = document.getElementById('submit-btn');
-const queueCount     = document.getElementById('queue-count');
+const form            = document.getElementById('submit-form');
+const urlInput        = document.getElementById('url-input');
+const jobsList        = document.getElementById('jobs-list');
+const formError       = document.getElementById('form-error');
+const submitBtn       = document.getElementById('submit-btn');
+const queueCount      = document.getElementById('queue-count');
+const cancelAllBtn    = document.getElementById('cancel-all-btn');
 const playlistConfirm = document.getElementById('playlist-confirm');
-const confirmMsg     = document.getElementById('playlist-confirm-msg');
-const btnPlaylist    = document.getElementById('btn-playlist');
-const btnSingle      = document.getElementById('btn-single');
-const btnCancel      = document.getElementById('btn-cancel');
+const confirmMsg      = document.getElementById('playlist-confirm-msg');
+const btnPlaylist     = document.getElementById('btn-playlist');
+const btnSingle       = document.getElementById('btn-single');
+const btnCancel       = document.getElementById('btn-cancel');
 
 const STATUS_LABELS = {
   queued:      { text: 'Queued',      css: 'status-queued'      },
   downloading: { text: 'Downloading', css: 'status-downloading' },
   done:        { text: 'Done',        css: 'status-done'        },
   error:       { text: 'Error',       css: 'status-error'       },
+  cancelled:   { text: 'Cancelled',   css: 'status-cancelled'   },
 };
 
 function isPlaylistUrl(url) {
@@ -129,9 +131,20 @@ function formatTime(iso) {
   return new Date(iso).toLocaleTimeString();
 }
 
+cancelAllBtn.addEventListener('click', async () => {
+  cancelAllBtn.disabled = true;
+  try {
+    await fetch('/api/jobs/cancel-all', { method: 'POST' });
+    await refreshJobs();
+  } finally {
+    cancelAllBtn.disabled = false;
+  }
+});
+
 function renderJobs(jobs) {
   const active = jobs.filter(j => j.status === 'queued' || j.status === 'downloading').length;
   queueCount.textContent = active ? `(${active} active)` : jobs.length ? `(${jobs.length})` : '';
+  cancelAllBtn.classList.toggle('hidden', active === 0);
 
   if (!jobs.length) {
     jobsList.innerHTML = '<p class="empty-state">No jobs yet. Paste a URL above to get started.</p>';
