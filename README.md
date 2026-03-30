@@ -2,6 +2,8 @@
 
 A local web app to convert YouTube videos to MP3 files using [yt-dlp](https://github.com/yt-dlp/yt-dlp).
 
+![YTVenger UI](docs/screenshot.png)
+
 ## Features
 
 - Paste a YouTube URL and get an MP3 download link
