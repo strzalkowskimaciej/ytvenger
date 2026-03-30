@@ -77,7 +77,20 @@ h1 { font-size: 2.5rem; color: var(--accent); }
 #btn-single   { background: var(--success); color: #000; }
 .btn-cancel   { background: #444;           color: var(--text); }
 
-h2 { margin: 2rem 0 1rem; font-size: 1.25rem; }
+h2 { margin: 2rem 0 1rem; font-size: 1.25rem; display: flex; align-items: center; gap: 0.75rem; }
+
+.cancel-all-btn {
+  padding: 0.25rem 0.75rem;
+  background: #555;
+  color: var(--text);
+  border: none;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.cancel-all-btn:hover:not(:disabled) { background: var(--error-color); }
+.cancel-all-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .job-card {
   background: var(--surface);
@@ -86,9 +99,10 @@ h2 { margin: 2rem 0 1rem; font-size: 1.25rem; }
   margin-bottom: 0.75rem;
   border-left: 4px solid var(--muted);
 }
-.job-card.status-downloading { border-left-color: var(--warning); }
-.job-card.status-done        { border-left-color: var(--success); }
+.job-card.status-downloading { border-left-color: var(--warning);     }
+.job-card.status-done        { border-left-color: var(--success);     }
 .job-card.status-error       { border-left-color: var(--error-color); }
+.job-card.status-cancelled   { border-left-color: #555; opacity: 0.6; }
 
 .job-title { font-weight: 600; margin-bottom: 0.4rem; word-break: break-all; }
 .job-meta { display: flex; align-items: center; gap: 1rem; font-size: 0.85rem; }
@@ -101,9 +115,10 @@ h2 { margin: 2rem 0 1rem; font-size: 1.25rem; }
   text-transform: uppercase;
   background: #444;
 }
-.status-downloading .status-badge { background: var(--warning); color: #000; }
-.status-done        .status-badge { background: var(--success); color: #000; }
+.status-downloading .status-badge { background: var(--warning);     color: #000; }
+.status-done        .status-badge { background: var(--success);     color: #000; }
 .status-error       .status-badge { background: var(--error-color); color: #fff; }
+.status-cancelled   .status-badge { background: #555;               color: #aaa; }
 
 .job-time { color: var(--muted); }
 .job-error { color: var(--error-color); font-size: 0.85rem; margin-top: 0.5rem; }

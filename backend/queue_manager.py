@@ -7,9 +7,14 @@ from models import Job, JobStatus
 
 _jobs: dict[str, Job] = {}
 _queue: asyncio.Queue[str] = asyncio.Queue()
+_jobs_to_cancel: set[str] = set()
 
 DOWNLOADS_DIR = Path("/app/downloads")
 MAX_CONCURRENT_WORKERS = 2
+
+
+class _DownloadCancelled(Exception):
+    pass
 
 
 def _make_job(url: str) -> Job:
@@ -72,16 +77,26 @@ async def _process_job(job_id: str):
     loop = asyncio.get_running_loop()
     try:
         await loop.run_in_executor(None, _download_sync, job)
+    except _DownloadCancelled:
+        job.status = JobStatus.CANCELLED
+        job.updated_at = datetime.now(timezone.utc)
     except Exception as exc:
         job.status = JobStatus.ERROR
         job.error = str(exc)
         job.updated_at = datetime.now(timezone.utc)
+    finally:
+        _jobs_to_cancel.discard(job.id)
 
 
 def _download_sync(job: Job):
-    job_dir = DOWNLOADS_DIR / job.id
-    job_dir.mkdir(parents=True, exist_ok=True)
-    output_template = str(job_dir / "%(title)s.%(ext)s")
+    output_template = str(DOWNLOADS_DIR / "%(title)s.%(ext)s")
+    pre_download_path: list[Path] = []
+
+    def progress_hook(info: dict):
+        if job.id in _jobs_to_cancel:
+            raise _DownloadCancelled()
+        if info.get("status") == "finished" and info.get("filename"):
+            pre_download_path.append(Path(info["filename"]))
 
     ydl_opts = {
         "format": "bestaudio/best",
@@ -91,6 +106,7 @@ def _download_sync(job: Job):
             "preferredcodec": "mp3",
             "preferredquality": "192",
         }],
+        "progress_hooks": [progress_hook],
         "quiet": False,
         "no_warnings": False,
         "noplaylist": True,
@@ -101,12 +117,14 @@ def _download_sync(job: Job):
         info = ydl.extract_info(job.url, download=True)
         job.title = info.get("title", "Unknown")
 
-    matches = list(job_dir.glob("*.mp3"))
-    if not matches:
+    if not pre_download_path:
         raise FileNotFoundError("MP3 file not found after download")
 
-    # Store as relative path: {job_id}/{filename.mp3}
-    job.filename = f"{job.id}/{matches[0].name}"
+    mp3_path = pre_download_path[-1].with_suffix(".mp3")
+    if not mp3_path.exists():
+        raise FileNotFoundError(f"Expected MP3 not found: {mp3_path.name}")
+
+    job.filename = mp3_path.name
     job.status = JobStatus.DONE
     job.updated_at = datetime.now(timezone.utc)
 
@@ -123,3 +141,24 @@ async def worker():
 async def start_workers(n: int = MAX_CONCURRENT_WORKERS):
     for _ in range(n):
         asyncio.create_task(worker())
+
+
+async def cancel_all():
+    now = datetime.now(timezone.utc)
+
+    # Cancel jobs waiting in queue
+    while not _queue.empty():
+        try:
+            job_id = _queue.get_nowait()
+            _queue.task_done()
+            job = _jobs.get(job_id)
+            if job and job.status == JobStatus.QUEUED:
+                job.status = JobStatus.CANCELLED
+                job.updated_at = now
+        except asyncio.QueueEmpty:
+            break
+
+    # Signal active downloads to stop
+    for job in _jobs.values():
+        if job.status == JobStatus.DOWNLOADING:
+            _jobs_to_cancel.add(job.id)

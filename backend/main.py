@@ -49,6 +49,12 @@ def list_jobs():
     return queue_manager.list_jobs()
 
 
+@app.post("/api/jobs/cancel-all", status_code=200)
+async def cancel_all_jobs():
+    await queue_manager.cancel_all()
+    return {"ok": True}
+
+
 @app.get("/api/jobs/{job_id}")
 def get_job(job_id: str):
     job = queue_manager.get_job(job_id)
